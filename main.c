@@ -9,5 +9,6 @@ int main(int args, char **argv)
 
   char *d = read_file(argv[1]);
   Lexer *l = init_lexer(d);
+  
   Parser *p = init_parser(l);
 }
