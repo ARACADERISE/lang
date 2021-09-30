@@ -6,61 +6,71 @@ Parser *parse_use(Parser *p);
 static PRegisterOutline p_regs[] = {
   [ax] = {
     .name = "ax",
-    .r_val = 0,
+    .high_bit = 0,
+    .low_bit = 0,
     .is_common = true,
     .type = accumulator
   },
   [bx] = {
     .name = "bx",
-    .r_val = 0,
+    .high_bit = 0,
+    .low_bit = 0,
     .is_common = true,
     .type = base_reg
   },
   [cx] = {
     .name = "cx",
-    .r_val = 0,
+    .high_bit = 0,     
+    .low_bit = 0,
     .is_common = true,
     .type = count_reg
   },
   [dx] = {
     .name = "dx",
-    .r_val = 0,
+    .high_bit = 0,
+    .low_bit = 0,
     .is_common = true,
     .type = data_reg
   },
   [es] = {
     .name = "dx",
-    .r_val = 0,
+    .high_bit = 0,
+    .low_bit = 0,
     .is_common = false,
     .type = extra_seg
   },
   [si] = {
     .name = "si",
-    .r_val = 0,
+    .high_bit = 0, 
+    .low_bit = 0,
     .is_common = false,
     .type = source_index
   },
   [di] = {
     .name = "di",
-    .r_val = 0,
+    .high_bit = 0,
+    .low_bit = 0,
     .is_common = false,
     .type = dest_index
   },
   [ds] = {
     .name = "ds",
-    .r_val = 0,
+    .high_bit = 0,
+    .low_bit = 0,
     .is_common = false,
     .type = data_seg
   },
   [cs] = {
     .name = "cs",
-    .r_val = 0,
+    .high_bit = 0,
+    .low_bit = 0,
     .is_common = false,
     .type = code_seg
   },
   [ss] = {
     .name = "ss",
-    .r_val = 0,
+    .high_bit = 0,
+    .low_bit = 0,
     .is_common = false,
     .type = stack_seg
   }
@@ -227,7 +237,9 @@ Parser *parse_set(Parser *p)
 
       dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
 
-      p_regs[ax].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[ax].parent_val = atoi(p->lex->curr_token->tv);
+      assign_bits(&p_regs[ax], p_regs[ax].parent_val);
+
       break;
     }
     case ah_reg:
@@ -239,7 +251,7 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
 
-      p_regs[ah].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[ah].high_bit = atoi(p->lex->curr_token->tv);
       break;
     }
     case al_reg:
@@ -251,7 +263,7 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
 
-      p_regs[al].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[al].low_bit = atoi(p->lex->curr_token->tv);
       break;
     }
     case bx_reg:
@@ -263,7 +275,9 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
 
-      p_regs[bx].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[bx].parent_val = atoi(p->lex->curr_token->tv);
+      assign_bits(&p_regs[bx], p_regs[bx].parent_val);
+      
       break;
     }
     case bh_reg:
@@ -275,7 +289,7 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
 
-      p_regs[bh].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[bh].high_bit = atoi(p->lex->curr_token->tv);
       break;
     }
     case bl_reg:
@@ -287,7 +301,7 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
 
-      p_regs[bl].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[bl].low_bit = atoi(p->lex->curr_token->tv);
       break;
     }
     case cx_reg:
@@ -299,7 +313,9 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
 
-      p_regs[cx].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[cx].parent_val = atoi(p->lex->curr_token->tv);
+      assign_bits(&p_regs[cx], p_regs[cx].parent_val);
+
       break;
     }
     case ch_reg:
@@ -311,7 +327,7 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
 
-      p_regs[ch].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[ch].high_bit = atoi(p->lex->curr_token->tv);
       break;
     }
     case cl_reg:
@@ -323,7 +339,7 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
 
-      p_regs[cl].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[cl].low_bit = atoi(p->lex->curr_token->tv);
       break;
     }
     case dx_reg:
@@ -335,7 +351,9 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
 
-      p_regs[dx].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[dx].parent_val = atoi(p->lex->curr_token->tv);
+      assign_bits(&p_regs[dx], p_regs[dx].parent_val);
+
       break;
     }
     case dh_reg:
@@ -347,7 +365,7 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
 
-      p_regs[dh].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[dh].high_bit = atoi(p->lex->curr_token->tv);
       break;
     }
     case dl_reg:
@@ -359,7 +377,7 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
 
-      p_regs[dl].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[dl].low_bit = atoi(p->lex->curr_token->tv);
       break;
     }
     case es_reg:
@@ -371,7 +389,9 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
 
-      p_regs[es].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[es].parent_val = atoi(p->lex->curr_token->tv);
+      assign_bits(&p_regs[es], p_regs[es].parent_val);
+
       break;
     }
     case si_reg:
@@ -383,7 +403,8 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
 
-      p_regs[si].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[si].parent_val = atoi(p->lex->curr_token->tv);
+      assign_bits(&p_regs[si], p_regs[si].parent_val);
       break;
     }
     case di_reg:
@@ -395,7 +416,8 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
 
-      p_regs[di].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[di].parent_val = atoi(p->lex->curr_token->tv);
+      assign_bits(&p_regs[di], p_regs[di].parent_val);
       break;
     }
     case ds_reg:
@@ -407,7 +429,8 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
 
-      p_regs[ds].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[ds].parent_val = atoi(p->lex->curr_token->tv);
+      assign_bits(&p_regs[ds], p_regs[ds].parent_val);
       break;
     }
     case cs_reg:
@@ -419,7 +442,8 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
       dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
 
-      p_regs[cs].r_val = atoi(p->lex->curr_token->tv);
+      p_regs[cs].parent_val = atoi(p->lex->curr_token->tv);
+      assign_bits(&p_regs[cs], p_regs[cs].parent_val);
       break;
     }
     case bp_reg:
@@ -441,8 +465,7 @@ Parser *parse_set(Parser *p)
         reallocStack(mo->mem.stack, last_val, mo->stack_p);
       }
 
-      p_regs[bp].r_val = atoi(p->lex->curr_token->tv);
-      mo->base_p = p_regs[bp].r_val;
+      mo->base_p = atoi(p->lex->curr_token->tv);
 
       mo->base_p_val = mo->mem.stack[mo->base_p];
       break;
@@ -456,8 +479,8 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
 
       int last_val = mo->stack_p;
-      p_regs[sp].r_val = atoi(p->lex->curr_token->tv);
-      mo->stack_p = p_regs[sp].r_val;
+      mo->stack_p = atoi(p->lex->curr_token->tv);
+
       mo->mem.stack = realloc(
         mo->mem.stack,
         mo->stack_p * sizeof(*mo->mem.stack)
@@ -465,7 +488,8 @@ Parser *parse_set(Parser *p)
       reallocStack(mo->mem.stack, last_val, mo->stack_p);
 
       // Make sure the bp register is zero
-      mo->base_p = 0;
+      if(last_val == 0)
+        mo->base_p = 0;
       mo->stack_p_val = mo->mem.stack[mo->stack_p];
       break;
     }
@@ -498,6 +522,7 @@ Parser *parse_sect(Parser *p)
         goto data_sect_end;
       }
       
+      recheck:
       switch(p->lex->curr_token->TT)
       {
         case string:
@@ -515,7 +540,11 @@ Parser *parse_sect(Parser *p)
             {
               mo->mem.data_sect[0]->var_type = db;
               mo->mem.data_sect[0]->db_data = calloc(1, sizeof(char));
-              mo->mem.data_sect[0]->db_data[0] = 'a';
+              
+              set_void(mo->mem.data_sect[0]->var_type, mo);
+
+              gen_token(p->lex);
+              assign(p->lex->curr_token->tv, mo->mem.data_sect[0]->db_data, sizeof(char));
 
               break;
             }
@@ -535,6 +564,9 @@ Parser *parse_sect(Parser *p)
       
       data_sect_end:
       gen_token(p->lex);
+
+      if(!(p->lex->curr_token->TT == RC))
+        goto recheck;
       break;
     }
     default: {

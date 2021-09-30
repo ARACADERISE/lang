@@ -73,7 +73,8 @@ enum variable_type
 {
   db,
   dw,
-  dd
+  dd,
+  dq
 };
 
 // Parent registers.
@@ -81,7 +82,9 @@ enum variable_type
 typedef struct p_register_outline
 {
   char *name;
-  u16 r_val;
+  unsigned short parent_val;
+  unsigned char high_bit;
+  unsigned char low_bit;
   bool is_common;
   enum reg_type type;
 
@@ -195,10 +198,60 @@ static inline int isNumber(char c)
   return (c >= '0' && c <= '9') ? 0 : 1;
 }
 
+static inline void assign_bits(PRegisterOutline *p, unsigned short val)
+{
+  p->high_bit = val >> 8;
+  p->low_bit = val & ((1 << 8)-1);
+}
+
+static inline void set_void(enum variable_type vtype, MemOutline *m)
+{
+  switch(vtype)
+  {
+    case db:
+    {
+      m->mem.data_sect[0]->dw_data = (void*)0;
+      m->mem.data_sect[0]->dd_data = (void*)0;
+      m->mem.data_sect[0]->dq_data = (void*)0;
+      break;
+    }
+    case dw:
+    {
+      m->mem.data_sect[0]->db_data = (void*)0;
+      m->mem.data_sect[0]->dd_data = (void*)0;
+      m->mem.data_sect[0]->dq_data = (void*)0;
+      break;
+    }
+    case dd:
+    {
+      m->mem.data_sect[0]->dw_data = (void*)0;
+      m->mem.data_sect[0]->db_data = (void*)0;
+      m->mem.data_sect[0]->dq_data = (void*)0;
+      break;
+    }
+    case dq:
+    {
+      m->mem.data_sect[0]->dw_data = (void*)0;
+      m->mem.data_sect[0]->dd_data = (void*)0;
+      m->mem.data_sect[0]->db_data = (void*)0;
+      break;
+    }
+  }
+}
+
 #define reallocStack(s, start, end) \
   for(int i = start; i < end; i++) \
   { \
     s[i] = 0; \
+  }
+
+#define assign(val, data, type) \
+  for(int i = 0; i < sizeof(val) / type; i++) { \
+    data[i] = val[i]; \
+    data = realloc( \
+      data, \
+      ((sizeof(data)/type)+1)*sizeof(data) \
+    ); \
   }
 
 #define dbg(e, f, ...) if(!(e)) { \
