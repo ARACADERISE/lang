@@ -186,7 +186,10 @@ Parser *parse_use(Parser *p)
 {
   next_token(p);
   dbg(p->lex->curr_token->TT == number, "Expected number");
-  mo->using_ = atoi(p->lex->curr_token->tv);
+
+  int num = try_conv_from_hex(p->lex->curr_token->tv, data_max);
+  mo->using_ = num;
+
   mo->mem.bin = calloc(mo->using_, sizeof(*mo->mem.bin));
   mo->origin = defOrg;
   mo->program_pointer = mo->origin;
@@ -210,20 +213,22 @@ Parser *parse_org(Parser* p)
   {
     err("Cannot originate program at, or above, bytes being used.");
   }
+
   dbg(p->lex->curr_token->TT == number, "Expected number");
-  
-  mo->origin = atoi(p->lex->curr_token->tv);
+  int number = try_conv_from_hex(p->lex->curr_token->tv, data_max);
+
+  mo->origin = number;
   mo->program_pointer = mo->origin;
   mo->base_p = mo->origin;
 
   return p;
-
 }
 
 Parser *parse_set(Parser *p)
 {
 
   gen_token(p->lex);
+  unsigned short number;
 
   switch(p->lex->curr_token->TT)
   {
@@ -234,11 +239,12 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
+      
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
+      dbg(number <= general_max, "Overflow Error");
 
-      p_regs[ax].parent_val = atoi(p->lex->curr_token->tv);
-      assign_bits(&p_regs[ax], p_regs[ax].parent_val);
+      assign_bits(&p_regs[ax], number,(CRegisterOutline[]){crego[ah], crego[al]});
 
       break;
     }
@@ -249,9 +255,12 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, child_max);
 
-      p_regs[ah].high_bit = atoi(p->lex->curr_token->tv);
+      dbg(number <= child_max, "Overflow Error");
+
+      p_regs[ah].high_bit = (unsigned char)number;
+      crego[ah].r_val = p_regs[ah].high_bit;
       break;
     }
     case al_reg:
@@ -261,9 +270,12 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      p_regs[al].low_bit = atoi(p->lex->curr_token->tv);
+      dbg(number <= child_max, "Overflow Error");
+
+      p_regs[al].low_bit = (unsigned char)number;
+      crego[al].r_val = p_regs[al].low_bit;
       break;
     }
     case bx_reg:
@@ -273,10 +285,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      p_regs[bx].parent_val = atoi(p->lex->curr_token->tv);
-      assign_bits(&p_regs[bx], p_regs[bx].parent_val);
+      dbg(number <= general_max, "Overflow Error");
+
+      assign_bits(&p_regs[bx], number, (CRegisterOutline[]){crego[ah], crego[al]});
       
       break;
     }
@@ -287,9 +300,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, child_max);
 
-      p_regs[bh].high_bit = atoi(p->lex->curr_token->tv);
+      dbg(number <= child_max, "Overflow Error");
+
+      p_regs[bh].high_bit = (unsigned char)number;
       break;
     }
     case bl_reg:
@@ -299,9 +314,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, child_max);
 
-      p_regs[bl].low_bit = atoi(p->lex->curr_token->tv);
+      dbg(number <= child_max, "Overflow Error");
+
+      p_regs[bl].low_bit = (unsigned char)number;
       break;
     }
     case cx_reg:
@@ -311,10 +328,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      p_regs[cx].parent_val = atoi(p->lex->curr_token->tv);
-      assign_bits(&p_regs[cx], p_regs[cx].parent_val);
+      dbg(number <= general_max, "Overflow Error");
+
+      assign_bits(&p_regs[cx], number,(CRegisterOutline[]){crego[ch], crego[cl]});
 
       break;
     }
@@ -325,9 +343,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, child_max);
 
-      p_regs[ch].high_bit = atoi(p->lex->curr_token->tv);
+      dbg(number <= child_max, "Overflow Error");
+
+      p_regs[ch].high_bit = (unsigned char)number;
       break;
     }
     case cl_reg:
@@ -337,9 +357,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, child_max);
 
-      p_regs[cl].low_bit = atoi(p->lex->curr_token->tv);
+      dbg(number <= child_max, "Overflow Error");
+
+      p_regs[cl].low_bit = (unsigned char)number;
       break;
     }
     case dx_reg:
@@ -349,10 +371,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      p_regs[dx].parent_val = atoi(p->lex->curr_token->tv);
-      assign_bits(&p_regs[dx], p_regs[dx].parent_val);
+      dbg(number <= general_max, "Overflow Error");
+
+      assign_bits(&p_regs[dx], number, (CRegisterOutline[]){crego[dh], crego[dl]});
 
       break;
     }
@@ -363,9 +386,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, child_max);
 
-      p_regs[dh].high_bit = atoi(p->lex->curr_token->tv);
+      dbg(number <= child_max, "Overflow Error");
+
+      p_regs[dh].high_bit = (unsigned char)number;
       break;
     }
     case dl_reg:
@@ -375,9 +400,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= child_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, child_max);
 
-      p_regs[dl].low_bit = atoi(p->lex->curr_token->tv);
+      dbg(number <= child_max, "Overflow Error");
+
+      p_regs[dl].low_bit = number;
       break;
     }
     case es_reg:
@@ -387,10 +414,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      p_regs[es].parent_val = atoi(p->lex->curr_token->tv);
-      assign_bits(&p_regs[es], p_regs[es].parent_val);
+      dbg(number <= general_max, "Overflow Error");
+
+      assign_bits(&p_regs[es], number,NULL);
 
       break;
     }
@@ -401,10 +429,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      p_regs[si].parent_val = atoi(p->lex->curr_token->tv);
-      assign_bits(&p_regs[si], p_regs[si].parent_val);
+      dbg(number <= general_max, "Overflow Error");
+
+      assign_bits(&p_regs[si], number,NULL);
       break;
     }
     case di_reg:
@@ -414,10 +443,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      p_regs[di].parent_val = atoi(p->lex->curr_token->tv);
-      assign_bits(&p_regs[di], p_regs[di].parent_val);
+      dbg(number <= general_max, "Overflow Error");
+
+      assign_bits(&p_regs[di], number,NULL);
       break;
     }
     case ds_reg:
@@ -427,10 +457,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      p_regs[ds].parent_val = atoi(p->lex->curr_token->tv);
-      assign_bits(&p_regs[ds], p_regs[ds].parent_val);
+      dbg(number <= general_max, "Overflow Error");
+
+      assign_bits(&p_regs[ds], number,NULL);
       break;
     }
     case cs_reg:
@@ -440,10 +471,11 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
-      dbg(atoi(p->lex->curr_token->tv) >= general_max, "Overflow Error");
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      p_regs[cs].parent_val = atoi(p->lex->curr_token->tv);
-      assign_bits(&p_regs[cs], p_regs[cs].parent_val);
+      dbg(number <= general_max, "Overflow Error");
+
+      assign_bits(&p_regs[cs], number,NULL);
       break;
     }
     case bp_reg:
@@ -453,11 +485,12 @@ Parser *parse_set(Parser *p)
       dbg(p->lex->curr_token->TT == comma, "Expected comma");
 
       gen_token(p->lex);
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
 
-      if(atoi(p->lex->curr_token->tv) >= mo->stack_p)
+      if(number >= mo->stack_p)
       {
         int last_val = mo->stack_p;
-        mo->stack_p = atoi(p->lex->curr_token->tv) + 100;
+        mo->stack_p = number + 100;
         mo->mem.stack = realloc(
           mo->mem.stack,
           mo->stack_p * sizeof(*mo->mem.stack)
@@ -465,7 +498,7 @@ Parser *parse_set(Parser *p)
         reallocStack(mo->mem.stack, last_val, mo->stack_p);
       }
 
-      mo->base_p = atoi(p->lex->curr_token->tv);
+      mo->base_p = number;
 
       mo->base_p_val = mo->mem.stack[mo->base_p];
       break;
@@ -479,7 +512,9 @@ Parser *parse_set(Parser *p)
       gen_token(p->lex);
 
       int last_val = mo->stack_p;
-      mo->stack_p = atoi(p->lex->curr_token->tv);
+      number = try_conv_from_hex(p->lex->curr_token->tv, general_max);
+
+      mo->stack_p = number;
 
       mo->mem.stack = realloc(
         mo->mem.stack,

@@ -93,7 +93,7 @@ char *get_number(Lexer *l)
   char *n = calloc(1, sizeof(*n));
   int index = 0;
 
-  while(isNumber(l->c)==0 && !(l->c == '\n') && !(l->c == '\0'))
+  while(!(l->c == '\n') && !(l->c == '\0'))
   {
     n[index] = l->c;
     index++;

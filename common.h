@@ -18,8 +18,9 @@ typedef int32_t i32;
 #define true 1
 #define false 0
 
-#define general_max   SHRT_MAX
+#define general_max   USHRT_MAX
 #define child_max     UCHAR_MAX
+#define data_max      UINT32_MAX
 
 enum registers
 {
@@ -118,6 +119,42 @@ typedef struct c_register_outline
   };
 } CRegisterOutline;
 
+// Initializing it here.
+static CRegisterOutline crego[] = {
+    [ah] = {
+        .name = "ah",
+        .r_val = 0
+    },
+    [al] = {
+        .name = "al",
+        .r_val = 0
+    },
+    [bh] = {
+        .name = "bh",
+        .r_val = 0
+    },
+    [bl] = {
+        .name = "bl",
+        .r_val = 0
+    },
+    [ch] = {
+        .name = "ch",
+        .r_val = 0
+    },
+    [cl] = {
+        .name = "cl",
+        .r_val = 0
+    },
+    [dh] = {
+        .name = "dh",
+        .r_val = 0
+    },
+    [dl] = {
+        .name = "dl",
+        .r_val = 0
+    }
+};
+
 // What register can correspond with what register.
 typedef struct r_correspond
 {
@@ -198,10 +235,63 @@ static inline int isNumber(char c)
   return (c >= '0' && c <= '9') ? 0 : 1;
 }
 
-static inline void assign_bits(PRegisterOutline *p, unsigned short val)
+static inline void assign_bits(PRegisterOutline *p, unsigned short val, CRegisterOutline c[2])
 {
-  p->high_bit = val >> 8;
-  p->low_bit = val & ((1 << 8)-1);
+    p->high_bit = val >> 8;
+    p->low_bit = val & ((1 << 8)-1);
+
+    p->parent_val = (p->high_bit << 8) | p->low_bit;
+
+    // Nothing to do if the register does not have a high/low bit register
+    if(c == NULL)
+        return;
+    
+    c[0].r_val = p->high_bit;
+    c[1].r_val = p->low_bit;
+}
+
+static inline bool is_hex(char *v)
+{
+    for(int i = 0; i < strlen(v); i++)
+    {
+        if(v[i] == 'x' || v[i] == 'h') return 0;
+    }
+
+    return 1;
+}
+
+static inline unsigned short try_conv_from_hex(char *v, int max)
+{
+    if(is_hex(v)==1)
+        return atoi(v);
+    
+    printf("%s", v);
+    long long dec = 0;
+    long long base = 1;
+
+    for(int i = strlen(v); i >= 0; i--)
+    {
+        if(v[i] >= '0' && v[i] <= '9')
+        {
+            dec += (v[i] - 48) * base;
+            base *= 16;
+        }
+        else if(v[i] >= 'A' && v[i] <= 'F')
+        {
+            dec += (v[i] - 55) * base;
+            base *= 16;
+        }
+        else if(v[i] >= 'a' && v[i] <= 'f')
+        {
+            dec += (v[i] - 87) * base;
+            base *= 16;
+        }
+    }
+
+    if(dec > max)
+        return 0;
+    
+    return (unsigned short)dec;
 }
 
 static inline void set_void(enum variable_type vtype, MemOutline *m)
@@ -260,5 +350,6 @@ static inline void set_void(enum variable_type vtype, MemOutline *m)
   }
 
 #define err(msg, ...) \
-  fprintf(stderr, msg, ##__VA_ARGS__); \
-  exit(EXIT_FAILURE)
+    fprintf(stderr, msg, ##__VA_ARGS__); \
+    exit(EXIT_FAILURE);
+    
