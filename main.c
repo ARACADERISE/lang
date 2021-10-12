@@ -5,6 +5,7 @@
 
 int main(int args, char **argv)
 {
+    
   dbg(args > 1, "Expect file as argument\n")
 
   char *d = read_file(argv[1]);

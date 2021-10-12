@@ -57,6 +57,7 @@ typedef struct lexer
 {
   char *data;
   int index;
+  int line;
   char c;
   struct token *curr_token;
 } Lexer;

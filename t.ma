@@ -12,4 +12,5 @@ set cx, 100
 
 sect data {
   name db 'hey'
+  value dw 0x50
 }

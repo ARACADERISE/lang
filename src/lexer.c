@@ -6,6 +6,7 @@ Lexer *init_lexer(char *data)
 
   l->curr_token = (void*)0;
   l->data = data;
+  l->line = 1;
   l->index = 0;
   l->c = l->data[l->index];
   
@@ -144,10 +145,19 @@ Token *gen_token(Lexer *lex)
   while(lex->c != '\0' && !(lex->index >= strlen(lex->data)))
   {
 redo:
-    if(lex->c == ' ' || lex->c == '\n')
+    if(lex->c == ' ')
     {
       skip_whitespace(lex);
       goto redo;
+    }
+    if(lex->c == '\n')
+    {
+        lex->line++;
+        while(lex->c == '\n')
+        {
+            advance_lexer(lex);
+            lex->line++;
+        }
     }
 
     switch(lex->c)

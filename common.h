@@ -78,6 +78,553 @@ enum variable_type
   dq
 };
 
+typedef enum instruction_request {
+    mem8,
+    mem16,
+    reg8,
+    reg16
+} ir;
+
+// mem8, reg8
+#define H88     (int[]){mem8, reg8}
+// mem16, reg16
+#define H89     (int[]){mem16, reg16}
+/*
+ * reg8, reg8
+ * reg8, mem8
+*/
+#define H8A     (int[][2]){{reg8, reg8}, {reg8, mem8}}
+
+// Opcodes
+typedef struct AsmOpcodes
+{
+    int opcode;
+    u8 mod[2];
+    u8 reg[3];
+    u8 RM[3];
+
+    enum registers lreg[2];
+    enum registers rreg[2];
+
+    union {
+        struct {};
+    };
+} ASM_OPCODES;
+
+static ASM_OPCODES ops[] = {
+    [0xC0] = {
+        .opcode = 0xC0,
+        .mod={'1','1'},
+        .reg={'0','0','0'},
+        .RM={'0','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xC1] = {
+        .opcode = 0xC1,
+        .mod={'1','1'},
+        .reg={'0','0','1'},
+        .RM={'0','0','0'},
+        .lreg={cl,cx},
+        .rreg={al,ax}
+    },
+    [0xC2] = {
+        .opcode = 0xc2,
+        .mod={'1','1'},
+        .reg={'0','1','0'},
+        .RM={'0','0','0'},
+        .lreg={dl,dx},
+        .rreg={al,ax}
+    },
+    [0xC3] = {
+        .opcode = 0xc3,
+        .mod={'1','1'},
+        .reg={'0','1','1'},
+        .RM={'0','0','0'},
+        .lreg={bl,bx},
+        .rreg={al,ax}
+    },
+    [0xC4] = {
+        .opcode = 0xc4,
+        .mod={'1','1'},
+        .reg={'1','0','0'},
+        .RM={'0','0','0'},
+        .lreg={sp,ah},
+        .rreg={al,ax}
+    },
+    [0xC5] = {
+        .opcode = 0xc5,
+        .mod={'1','1'},
+        .reg={'1','0','1'},
+        .RM={'0','0','0'},
+        .lreg={bp,ch},
+        .rreg={al,ax}
+    },
+    [0xC6] = {
+        .opcode = 0xc6,
+        .mod={'1','1'},
+        .reg={'1','1','0'},
+        .RM={'0','0','0'},
+        .lreg={si,dh},
+        .rreg={al,ax}
+    },
+    [0xC7] = {
+        .opcode = 0xc7,
+        .mod={'1','1'},
+        .reg={'1','1','1'},
+        .RM={'0','0','0'},
+        .lreg={di,bh},
+        .rreg={al,ax}
+    },
+    [0xC8] = {
+        .opcode = 0xc8,
+        .mod={'1','1'},
+        .reg={'0','0','0'},
+        .RM={'0','0','1'},
+        .lreg={al,ax},
+        .rreg={cl,cx}
+    },
+    [0xC9] = {
+        .opcode = 0xc9,
+        .mod={'1','1'},
+        .reg={'0','0','1'},
+        .RM={'0','0','1'},
+        .lreg={cl,cx},
+        .rreg={cl,cx}
+    },
+    [0xCA] = {
+        .opcode = 0xCA,
+        .mod={'1','1'},
+        .reg={'0','1','0'},
+        .RM={'0','0','1'},
+        .lreg={dl,dx},
+        .rreg={cl,cx}
+    },
+    [0xCB] = {
+        .opcode = 0xCB,
+        .mod={'1','1'},
+        .reg={'0','1','1'},
+        .RM={'0','0','1'},
+        .lreg={bl,bx},
+        .rreg={cl,cx}
+    },
+    [0xCC] = {
+        .opcode = 0xCC,
+        .mod={'1','1'},
+        .reg={'1','0','0'},
+        .RM={'0','0','1'},
+        .lreg={dp,ah},
+        .rreg={cl,cx}
+    },
+    [0xCD] = {
+        .opcode = 0xCD,
+        .mod={'1','1'},
+        .reg={'1','0','1'},
+        .RM={'0','0','1'},
+        .lreg={bp,ch},
+        .rreg={cl,cx}
+    },
+    [0xCE] = {
+        .opcode = 0xCE,
+        .mod={'1','1'},
+        .reg={'1','1','0'},
+        .RM={'0','0','1'},
+        .lreg={si,dh},
+        .rreg={cl,cx}
+    },
+    [0xCF] = {
+        .opcode = 0xCF,
+        .mod={'1','1'},
+        .reg={'1','1','1'},
+        .RM={'0','0','1'},
+        .lreg={di,bh},
+        .rreg={cl,cx}
+    },
+    [0xD0] = {
+        .opcode = 0xDO,
+        .mod={'1','1'},
+        .reg={'0','0','0'},
+        .RM={'0','1','0'},
+        .lreg={al,ax},
+        .rreg={dl,dx}
+    },
+    [0xD1] = {
+        .opcode = 0xD1,
+        .mod={'1','1'},
+        .reg={'0','0','1'},
+        .RM={'0','1','0'},
+        .lreg={cl,cx},
+        .rreg={dl,dx}
+    },
+    [0xD2] = {
+        .opcode = 0xD2,
+        .mod={'1','1'},
+        .reg={'0','1','0'},
+        .RM={'0','1','0'},
+        .lreg={dl,dx},
+        .rreg={dl,dx}
+    },
+    [0xD3] = {
+        .opcode = 0xD3,
+        .mod={'1','1'},
+        .reg={'0','1','1'},
+        .RM={'0','1','0'},
+        .lreg={bl,bx},
+        .rreg={dl,dx}
+    },
+    [0xD4] = {
+        .opcode = 0xD4,
+        .mod={'1','1'},
+        .reg={'1','0','0'},
+        .RM={'0','1','0'},
+        .lreg={sp,ah},
+        .rreg={dl,dx}
+    },
+    [0xD5] = {
+        .opcode = 0xD5,
+        .mod={'1','1'},
+        .reg={'1','0','1'},
+        .RM={'0','1','0'},
+        .lreg={bp,ch},
+        .rreg={dl,dx}
+    },
+    [0xD6] = {
+        .opcode = 0xD6,
+        .mod={'1','1'},
+        .reg={'1','1','0'},
+        .RM={'0','1','0'},
+        .lreg={si,dh},
+        .rreg={dl,dx}
+    },
+    [0xD7] = {
+        .opcode = 0xD7,
+        .mod={'1','1'},
+        .reg={'1','1','1'},
+        .RM={'0','1','0'},
+        .lreg={di,bh},
+        .rreg={dl,dx}
+    },
+    [0xD8] = {
+        .opcode = 0xD8,
+        .mod={'1','1'},
+        .reg={'0','0','0'},
+        .RM={'0','1','1'},
+        .lreg={al,ax},
+        .rreg={bl,bx}
+    },
+    [0xD9] = {
+        .opcode = 0xD9,
+        .mod={'1','1'},
+        .reg={'0','0','1'},
+        .RM={'0','1','1'},
+        .lreg={cl,cx},
+        .rreg={bl,bx}
+    },
+    [0xDA] = {
+        .opcode = 0xDA,
+        .mod={'1','1'},
+        .reg={'0','1','0'},
+        .RM={'0','1','1'},
+        .lreg={dl,dx},
+        .rreg={bl,bx}
+    },
+    [0xDB] = {.opcode = 0xDB,
+        .mod={'1','1'},
+        .reg={'0','1','1'},
+        .RM={'0','1','1'},
+        .lreg={bl,bx},
+        .rreg={bl,bx}
+    },
+    [0xDC] = {
+        .opcode = 0xDC,
+        .mod={'1','1'},
+        .reg={'1','0','0'},
+        .RM={'0','1','1'},
+        .lreg={sp,ah},
+        .rreg={bl,bx}
+    },
+    [0xDD] = {
+        .opcode = 0xDD,
+        .mod={'1','1'},
+        .reg={'1','0','1'},
+        .RM={'0','1','1'},
+        .lreg={bp,ch},
+        .rreg={bl,bx}
+    },
+    [0xDE] = {
+        .opcode = 0xDE,
+        .mod={'1','1'},
+        .reg={'1','1','0'},
+        .RM={'0','1','1'},
+        .lreg={si,dh},
+        .rreg={bl,bx}
+    },
+    [0xDF] = {
+        .opcode = 0xDF,
+        .mod={'1','1'},
+        .reg={'1','1','1'},
+        .RM={'0','1','1'},
+        .lreg={bi,dh},
+        .rreg={bl,bx}
+    },
+    [0xE0] = {
+        .opcode = 0xE0,
+        .mod={'1','1'},
+        .reg={'0','0','0'},
+        .RM={'1','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xE1] = {
+        .opcode = 0xE1,
+        .mod={'1','1'},
+        .reg={'0','0','1'},
+        .RM={'1','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xE2] = {
+        .opcode = 0xE2,
+        .mod={'1','1'},
+        .reg={'0','1','0'},
+        .RM={'1','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xE3] = {
+        .opcode = 0xE3,
+        .mod={'1','1'},
+        .reg={'0','1','1'},
+        .RM={'1','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xE4] = {
+        .opcode = 0xE4,
+        .mod={'1','1'},
+        .reg={'1','0','0'},
+        .RM={'1','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xE5] = {
+        .opcode = 0xE5,
+        .mod={'1','1'},
+        .reg={'1','0','1'},
+        .RM={'1','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xE6] = {
+        .opcode = 0xE6,
+        .mod={'1','1'},
+        .reg={'1','1','0'},
+        .RM={'1','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xE7] = {
+        .opcode = 0xE7,
+        .mod={'1','1'},
+        .reg={'1','1','1'},
+        .RM={'1','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xE8] = {
+        .opcode = 0xE8,
+        .mod={'1','1'},
+        .reg={'0','0','0'},
+        .RM={'1','0','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xE9] = {
+        .opcode = 0xE9,
+        .mod={'1','1'},
+        .reg={'0','0','1'},
+        .RM={'1','0','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xEA] = {
+        .opcode = 0xEA,
+        .mod={'1','1'},
+        .reg={'0','1','0'},
+        .RM={'1','0','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xEB] = {
+        .opcode = 0xEB,
+        .mod={'1','1'},
+        .reg={'0','1','1'},
+        .RM={'1','0','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xEC] = {
+        .opcode = 0xEC,
+        .mod={'1','1'},
+        .reg={'1','0','0'},
+        .RM={'1','0','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xED] = {
+        .opcode = 0xED,
+        .mod={'1','1'},
+        .reg={'1','0','1'},
+        .RM={'1','0','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xEE] = {
+        .opcode = 0xEE,
+        .mod={'1','1'},
+        .reg={'1','1','0'},
+        .RM={'1','0','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xEF] = {
+        .opcode = 0xEF,
+        .mod={'1','1'},
+        .reg={'1','1','1'},
+        .RM={'1','0','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF0] = {
+        .opcode = 0xF0,
+        .mod={'1','1'},
+        .reg={'0','0','0'},
+        .RM={'1','1','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF1] = {
+        .opcode = 0xF1,
+        .mod={'1','1'},
+        .reg={'0','0','1'},
+        .RM={'1','1','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF2] = {
+        .opcode = 0xF2,
+        .mod={'1','1'},
+        .reg={'0','1','0'},
+        .RM={'1','1','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF3] = {
+        .opcode = 0xF3,
+        .mod={'1','1'},
+        .reg={'0','1','1'},
+        .RM={'1','1','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF4] = {
+        .opcode = 0xF4,
+        .mod={'1','1'},
+        .reg={'1','0','0'},
+        .RM={'1','1','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF5] = {
+        .opcode = 0xF5,
+        .mod={'1','1'},
+        .reg={'1','0','1'},
+        .RM={'1','1','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF6] = {
+        .opcode = 0xF6,
+        .mod={'1','1'},
+        .reg={'1','1','0'},
+        .RM={'1','1','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF7] = {
+        .opcode = 0xF7,
+        .mod={'1','1'},
+        .reg={'1','1','1'},
+        .RM={'1','1','0'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF8] = {
+        .opcode = 0xF8,
+        .mod={'1','1'},
+        .reg={'0','0','0'},
+        .RM={'1','1','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xF9] = {
+        .opcode = 0xF9,
+        .mod={'1','1'},
+        .reg={'0','0','1'},
+        .RM={'1','1','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xFA] = {
+        .opcode = 0xFA,
+        .mod={'1','1'},
+        .reg={'0','1','0'},
+        .RM={'1','1','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xFB] = {
+        .opcode = 0xFB,
+        .mod={'1','1'},
+        .reg={'0','1','1'},
+        .RM={'1','1','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xFC] = {
+        .opcode = 0xFC,
+        .mod={'1','1'},
+        .reg={'1','0','0'},
+        .RM={'1','1','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xFD] = {
+        .opcode = 0xFD,
+        .mod={'1','1'},
+        .reg={'1','0','1'},
+        .RM={'1','1','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xFE] = {
+        .opcode = 0xFE,
+        .mod={'1','1'},
+        .reg={'1','1','0'},
+        .RM={'1','1','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+    [0xFF] = {
+        .opcode = 0xFF,
+        .mod={'1','1'},
+        .reg={'1','1','1'},
+        .RM={'1','1','1'},
+        .lreg={al,ax},
+        .rreg={al,ax}
+    },
+};
+
 // Parent registers.
 // ax,bx,cx,dx,es,si,ss,di
 typedef struct p_register_outline
@@ -95,6 +642,46 @@ typedef struct p_register_outline
     };
   };
 } PRegisterOutline;
+
+typedef struct mov_instruction
+{
+    enum instruction_request lType;
+    enum instruction_request rType;
+
+    int *instruction_set;
+    int opcode;
+} MovInstruction;
+
+static inline void get_binary_data(MovInstruction *mi)
+{
+    if(mi->lType == mem8 && mi->rType == reg8)
+    {
+        mi->instruction_set = H88;
+        mi->opcode = 0x88;
+        return;
+    }
+    if(mi->lType == mem16 && mi->rType == reg16)
+    {
+        mi->instruction_set = H89;
+        mi->opcode = 0x89;
+        return;
+    }
+    if(mi->lType == reg8 && mi->rType == reg8)
+    {
+        mi->instruction_set = H8A[0];
+        mi->opcode = 0x8A;
+        return;
+    }
+    if(mi->lType == reg8 && mi->rType == mem8)
+    {
+        mi->instruction_set = H8A[1];
+        mi->opcode = 0x8A;
+        return;
+    }
+
+    fprintf(stderr, "Cannot configure binary data for current instruction set.");
+    exit(EXIT_FAILURE);
+}
 
 // Child registers.
 /*
@@ -221,9 +808,15 @@ typedef struct MemoryOutline
     } **data_sect;
   } mem;
 } MemOutline;
+
+static int mo_index = 0;
 static MemOutline *mo;
 
 #define defOrg 0x0
+
+/* COLORS */
+static const char *RED =    "\e[1;31m";
+static const char *LRED =   "\e[1;91m";
 
 static inline int isAscii(char c)
 {
@@ -264,8 +857,7 @@ static inline unsigned short try_conv_from_hex(char *v, int max)
 {
     if(is_hex(v)==1)
         return atoi(v);
-    
-    printf("%s", v);
+        
     long long dec = 0;
     long long base = 1;
 
