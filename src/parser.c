@@ -171,6 +171,7 @@ Parser *init_parser(Lexer *lex)
   mo = calloc(1, sizeof(*mo));
 
   p->lex = lex;
+  p->mi = calloc(1, sizeof(*p->mi));
   start(p);
 
   return (void*)0;
@@ -638,6 +639,72 @@ Parser *parse_sect(Parser *p)
   return p;
 }
 
+void has_comma(Parser *p)
+{
+    dbg(p->lex->curr_token->TT == comma, "%sError Report:\n\t%sLine: %d\n\tReport: Execting comma",RED,LRED, p->lex->line);
+    gen_token(p->lex);
+}
+
+void set_rreg(Parser *p)
+{
+    switch(p->lex->curr_token->TT)
+    {
+        case bx_reg: p->mi->rreg=bx;break;
+        case ax_reg: p->mi->rreg=ax;break;
+        case cx_reg: p->mi->rreg=cx;break;
+        case dx_reg: p->mi->rreg=dx;break;
+        case ah_reg: p->mi->rreg=ah;break;
+        case al_reg: p->mi->rreg=al;break;
+        case ch_reg: p->mi->rreg=ch;break;
+        case cl_reg: p->mi->rreg=cl;break;
+        case dh_reg: p->mi->rreg=dh;break;
+        case dl_reg: p->mi->rreg=dl;break;
+        case bh_reg: p->mi->rreg=bh;break;
+        case bl_reg: p->mi->rreg=bl;break;
+        case si_reg: p->mi->rreg=si;break;
+        case di_reg: p->mi->rreg=di;break;
+        case bp_reg: p->mi->rreg=bp;break;
+        case sp_reg: p->mi->rreg=sp;break;
+        case es_reg: p->mi->rreg=es;break;
+        case ds_reg: p->mi->rreg=ds;break;
+        case cs_reg: p->mi->rreg=cs;break;
+        case ss_reg: p->mi->rreg=ss;break;
+        default:
+        {
+            err("%sError Report:\n\t%sLine: %d\n\tReport: Expecting a valid rval register.",RED,LRED, p->lex->line);
+        }
+    }
+}
+
+Parser *parse_mov(Parser *p)
+{
+    gen_token(p->lex);
+
+    switch(p->lex->curr_token->TT)
+    {
+        case ax_reg:
+        case bx_reg:
+        case cx_reg:
+        case dx_reg:
+        {
+            p->mi->lType = mem16;
+            p->mi->lreg = p->lex->curr_token->TT;
+
+            gen_token(p->lex);
+            
+            has_comma(p);
+
+            dbg(p->lex->curr_token->parent_reg == 0, "%sError Report:\n\t%sLine: %d\n\tReport: Invalid combination", RED, LRED, p->lex->line);
+
+            set_rreg(p);
+            p->mi->rType = reg16;
+            get_binary_data(p->mi);
+        }
+    }
+
+    return p;
+}
+
 void start(Parser *p)
 {
   do {
@@ -649,6 +716,7 @@ void start(Parser *p)
       case org_k: parse_org(p);break;
       case set_k: parse_set(p);break;
       case sect_k: parse_sect(p);break;
+      case mov_k: parse_mov(p);break;
       case eof: goto end;
       default: break;
     }

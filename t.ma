@@ -14,3 +14,6 @@ sect data {
   name db 'hey'
   value dw 0x50
 }
+
+mov bx, ax
+mov cx, ax

@@ -24,26 +24,26 @@ typedef int32_t i32;
 
 enum registers
 {
-  ax,
-  ah,
-  al,
-  bx,
-  bh,
-  bl,
-  cx,
-  ch,
-  cl,
-  dx,
-  dh,
-  dl,
-  sp,
-  ss,
-  bp,
-  si,
-  di,
-  es,
-  cs,
-  ds
+  ax=0xAA,
+  ah=0xAB,
+  al=0xAC,
+  bx=0xAD,
+  bh=0xAE,
+  bl=0xAF,
+  cx=0xBA,
+  ch=0xBB,
+  cl=0xBC,
+  dx=0xBD,
+  dh=0xBE,
+  dl=0xBF,
+  sp=0xCA,
+  ss=0xCB,
+  bp=0xCC,
+  si=0xCD,
+  di=0xCE,
+  es=0xCF,
+  cs=0xDA,
+  ds=0xDB
 };
 
 enum reg_type
@@ -111,7 +111,7 @@ typedef struct AsmOpcodes
     };
 } ASM_OPCODES;
 
-static ASM_OPCODES ops[] = {
+static const ASM_OPCODES ops[] = {
     [0xC0] = {
         .opcode = 0xC0,
         .mod={'1','1'},
@@ -213,7 +213,7 @@ static ASM_OPCODES ops[] = {
         .mod={'1','1'},
         .reg={'1','0','0'},
         .RM={'0','0','1'},
-        .lreg={dp,ah},
+        .lreg={sp,ah},
         .rreg={cl,cx}
     },
     [0xCD] = {
@@ -241,7 +241,7 @@ static ASM_OPCODES ops[] = {
         .rreg={cl,cx}
     },
     [0xD0] = {
-        .opcode = 0xDO,
+        .opcode = 0xD0,
         .mod={'1','1'},
         .reg={'0','0','0'},
         .RM={'0','1','0'},
@@ -364,7 +364,7 @@ static ASM_OPCODES ops[] = {
         .mod={'1','1'},
         .reg={'1','1','1'},
         .RM={'0','1','1'},
-        .lreg={bi,dh},
+        .lreg={bp,dh},
         .rreg={bl,bx}
     },
     [0xE0] = {
@@ -373,63 +373,63 @@ static ASM_OPCODES ops[] = {
         .reg={'0','0','0'},
         .RM={'1','0','0'},
         .lreg={al,ax},
-        .rreg={al,ax}
+        .rreg={ah,sp}
     },
     [0xE1] = {
         .opcode = 0xE1,
         .mod={'1','1'},
         .reg={'0','0','1'},
         .RM={'1','0','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={cl,cx},
+        .rreg={ah,sp}
     },
     [0xE2] = {
         .opcode = 0xE2,
         .mod={'1','1'},
         .reg={'0','1','0'},
         .RM={'1','0','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={dl,dx},
+        .rreg={ah,sp}
     },
     [0xE3] = {
         .opcode = 0xE3,
         .mod={'1','1'},
         .reg={'0','1','1'},
         .RM={'1','0','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={bl,bx},
+        .rreg={ah,sp}
     },
     [0xE4] = {
         .opcode = 0xE4,
         .mod={'1','1'},
         .reg={'1','0','0'},
         .RM={'1','0','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={sp,ah},
+        .rreg={ah,sp}
     },
     [0xE5] = {
         .opcode = 0xE5,
         .mod={'1','1'},
         .reg={'1','0','1'},
         .RM={'1','0','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={bp,ch},
+        .rreg={ah,sp}
     },
     [0xE6] = {
         .opcode = 0xE6,
         .mod={'1','1'},
         .reg={'1','1','0'},
         .RM={'1','0','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={si,dh},
+        .rreg={ah,sp}
     },
     [0xE7] = {
         .opcode = 0xE7,
         .mod={'1','1'},
         .reg={'1','1','1'},
         .RM={'1','0','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={di,bh},
+        .rreg={ah,sp}
     },
     [0xE8] = {
         .opcode = 0xE8,
@@ -437,63 +437,63 @@ static ASM_OPCODES ops[] = {
         .reg={'0','0','0'},
         .RM={'1','0','0'},
         .lreg={al,ax},
-        .rreg={al,ax}
+        .rreg={ch,bp}
     },
     [0xE9] = {
         .opcode = 0xE9,
         .mod={'1','1'},
         .reg={'0','0','1'},
         .RM={'1','0','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={cl,cx},
+        .rreg={ch,bp}
     },
     [0xEA] = {
         .opcode = 0xEA,
         .mod={'1','1'},
         .reg={'0','1','0'},
         .RM={'1','0','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={dl,dx},
+        .rreg={ch,bp}
     },
     [0xEB] = {
         .opcode = 0xEB,
         .mod={'1','1'},
         .reg={'0','1','1'},
         .RM={'1','0','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={bl,bx},
+        .rreg={ch,bp}
     },
     [0xEC] = {
         .opcode = 0xEC,
         .mod={'1','1'},
         .reg={'1','0','0'},
         .RM={'1','0','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={sp,ah},
+        .rreg={ch,bp}
     },
     [0xED] = {
         .opcode = 0xED,
         .mod={'1','1'},
         .reg={'1','0','1'},
         .RM={'1','0','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={bp,ch},
+        .rreg={ch,bp}
     },
     [0xEE] = {
         .opcode = 0xEE,
         .mod={'1','1'},
         .reg={'1','1','0'},
         .RM={'1','0','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={si,dh},
+        .rreg={ch,bp}
     },
     [0xEF] = {
         .opcode = 0xEF,
         .mod={'1','1'},
         .reg={'1','1','1'},
         .RM={'1','0','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={di,bh},
+        .rreg={ch,bp}
     },
     [0xF0] = {
         .opcode = 0xF0,
@@ -501,63 +501,63 @@ static ASM_OPCODES ops[] = {
         .reg={'0','0','0'},
         .RM={'1','1','0'},
         .lreg={al,ax},
-        .rreg={al,ax}
+        .rreg={dh,si}
     },
     [0xF1] = {
         .opcode = 0xF1,
         .mod={'1','1'},
         .reg={'0','0','1'},
         .RM={'1','1','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={cl,cx},
+        .rreg={dh,si}
     },
     [0xF2] = {
         .opcode = 0xF2,
         .mod={'1','1'},
         .reg={'0','1','0'},
         .RM={'1','1','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={dl,dx},
+        .rreg={dh,si}
     },
     [0xF3] = {
         .opcode = 0xF3,
         .mod={'1','1'},
         .reg={'0','1','1'},
         .RM={'1','1','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={bl,bx},
+        .rreg={dh,si}
     },
     [0xF4] = {
         .opcode = 0xF4,
         .mod={'1','1'},
         .reg={'1','0','0'},
         .RM={'1','1','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={sp,ah},
+        .rreg={dh,si}
     },
     [0xF5] = {
         .opcode = 0xF5,
         .mod={'1','1'},
         .reg={'1','0','1'},
         .RM={'1','1','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={bp,ch},
+        .rreg={dh,si}
     },
     [0xF6] = {
         .opcode = 0xF6,
         .mod={'1','1'},
         .reg={'1','1','0'},
         .RM={'1','1','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={si,dh},
+        .rreg={dh,si}
     },
     [0xF7] = {
         .opcode = 0xF7,
         .mod={'1','1'},
         .reg={'1','1','1'},
         .RM={'1','1','0'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={di,bh},
+        .rreg={dh,si}
     },
     [0xF8] = {
         .opcode = 0xF8,
@@ -565,64 +565,72 @@ static ASM_OPCODES ops[] = {
         .reg={'0','0','0'},
         .RM={'1','1','1'},
         .lreg={al,ax},
-        .rreg={al,ax}
+        .rreg={bh,di}
     },
     [0xF9] = {
         .opcode = 0xF9,
         .mod={'1','1'},
         .reg={'0','0','1'},
         .RM={'1','1','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={cl,cx},
+        .rreg={bh,di}
     },
     [0xFA] = {
         .opcode = 0xFA,
         .mod={'1','1'},
         .reg={'0','1','0'},
         .RM={'1','1','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={dl,dx},
+        .rreg={bh,di}
     },
     [0xFB] = {
         .opcode = 0xFB,
         .mod={'1','1'},
         .reg={'0','1','1'},
         .RM={'1','1','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={bl,bx},
+        .rreg={bh,di}
     },
     [0xFC] = {
         .opcode = 0xFC,
         .mod={'1','1'},
         .reg={'1','0','0'},
         .RM={'1','1','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={sp,ah},
+        .rreg={bh,di}
     },
     [0xFD] = {
         .opcode = 0xFD,
         .mod={'1','1'},
         .reg={'1','0','1'},
         .RM={'1','1','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={bp,ch},
+        .rreg={bh,di}
     },
     [0xFE] = {
         .opcode = 0xFE,
         .mod={'1','1'},
         .reg={'1','1','0'},
         .RM={'1','1','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={si,dh},
+        .rreg={bh,di}
     },
     [0xFF] = {
         .opcode = 0xFF,
         .mod={'1','1'},
         .reg={'1','1','1'},
         .RM={'1','1','1'},
-        .lreg={al,ax},
-        .rreg={al,ax}
+        .lreg={di,bh},
+        .rreg={bh,di}
     },
+    [0x0] = {
+        .opcode = 0x0,
+        .mod = {},
+        .reg = {},
+        .RM = {},
+        .lreg = {},
+        .rreg = {}
+    }
 };
 
 // Parent registers.
@@ -648,33 +656,51 @@ typedef struct mov_instruction
     enum instruction_request lType;
     enum instruction_request rType;
 
-    int *instruction_set;
+    enum registers lreg;
+    enum registers rreg;
+
+    ASM_OPCODES instruction_set;
     int opcode;
 } MovInstruction;
+
+static inline ASM_OPCODES set(MovInstruction *mi)
+{
+    int index = 0xC0;
+    int found = 1;
+
+    for(int i = 0; i < sizeof(ops)/sizeof(ASM_OPCODES); i++)
+    {
+        printf("%d\n", ops[index].opcode);
+    }
+}
 
 static inline void get_binary_data(MovInstruction *mi)
 {
     if(mi->lType == mem8 && mi->rType == reg8)
     {
-        mi->instruction_set = H88;
+        ASM_OPCODES opcode = set(mi);
+        printf("%d\n", opcode.opcode);
         mi->opcode = 0x88;
         return;
     }
     if(mi->lType == mem16 && mi->rType == reg16)
     {
-        mi->instruction_set = H89;
+        ASM_OPCODES opcode = set(mi);
+        printf("%d\n", opcode.opcode);
         mi->opcode = 0x89;
         return;
     }
     if(mi->lType == reg8 && mi->rType == reg8)
     {
-        mi->instruction_set = H8A[0];
+        ASM_OPCODES opcode = set(mi);
+        printf("%d\n", opcode.opcode);
         mi->opcode = 0x8A;
         return;
     }
     if(mi->lType == reg8 && mi->rType == mem8)
     {
-        mi->instruction_set = H8A[1];
+        ASM_OPCODES opcode = set(mi);
+        printf("%d\n", opcode.opcode);
         mi->opcode = 0x8A;
         return;
     }

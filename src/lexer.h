@@ -11,26 +11,26 @@ typedef struct token
     dot, // .
     comma, // ,
     colon, // :
-    ax_reg,
-    bx_reg,
-    cx_reg,
-    dx_reg,
-    es_reg,
-    si_reg,
-    di_reg,
-    ss_reg,
-    sp_reg,
-    bp_reg,
-    ah_reg,
-    al_reg,
-    bh_reg,
-    bl_reg,
-    ch_reg,
-    cl_reg,
-    dh_reg,
-    dl_reg,
-    ds_reg,
-    cs_reg,
+    ax_reg=0xAA,
+    bx_reg=0xAB,
+    cx_reg=0xAC,
+    dx_reg=0xAD,
+    es_reg=0xAE,
+    si_reg=0xAF,
+    di_reg=0xBA,
+    ss_reg=0xBB,
+    sp_reg=0xBC,
+    bp_reg=0xBD,
+    ah_reg=0xBE,
+    al_reg=0xBF,
+    bh_reg=0xCA,
+    bl_reg=0xCB,
+    ch_reg=0xCC,
+    cl_reg=0xCD,
+    dh_reg=0xCE,
+    dl_reg=0xCF,
+    ds_reg=0xDA,
+    cs_reg=0xDB,
     db_k, // 1 byte
     dw_k, // 2 byte
     dd_k, // 4 byte
@@ -51,6 +51,7 @@ typedef struct token
     eof       // \0
   } TT;
   char *tv;
+  u8 parent_reg;
 } Token;
 
 typedef struct lexer
