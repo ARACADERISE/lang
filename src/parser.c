@@ -693,12 +693,16 @@ Parser *parse_mov(Parser *p)
             gen_token(p->lex);
             
             has_comma(p);
+	    printf("%s", p->lex->curr_token->tv);
 
             dbg(p->lex->curr_token->parent_reg == 0, "%sError Report:\n\t%sLine: %d\n\tReport: Invalid combination", RED, LRED, p->lex->line);
 
-            set_rreg(p);
+            //set_rreg(p);
+	    p->mi->rreg = p->lex->curr_token->TT;
             p->mi->rType = reg16;
             get_binary_data(p->mi);
+
+	    break;
         }
     }
 
