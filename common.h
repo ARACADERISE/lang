@@ -692,32 +692,18 @@ end:
 static inline void get_binary_data(MovInstruction *mi)
 {
     if(mi->lType == mem8 && mi->rType == reg8)
-    {
-	mi->instruction_set = set(mi);
         mi->opcode = 0x88;
-        return;
-    }
-    if(mi->lType == mem16 && mi->rType == reg16)
-    {
-        mi->instruction_set = set(mi);
-        mi->opcode = 0x89;
-        return;
-    }
-    if(mi->lType == reg8 && mi->rType == reg8)
-    {
-        mi->instruction_set = set(mi);
-        mi->opcode = 0x8A;
-        return;
-    }
-    if(mi->lType == reg8 && mi->rType == mem8)
-    {
-        mi->instruction_set = set(mi);
-        mi->opcode = 0x8A;
-        return;
-    }
 
-    fprintf(stderr, "Cannot configure binary data for current instruction set.");
-    exit(EXIT_FAILURE);
+    if(mi->lType == mem16 && mi->rType == reg16)
+        mi->opcode = 0x89;
+
+    if(mi->lType == reg8 && mi->rType == reg8)
+        mi->opcode = 0x8A;
+
+    if(mi->lType == reg8 && mi->rType == mem8)
+        mi->opcode = 0x8A;
+
+    mi->instruction_set = set(mi);
 }
 
 // Child registers.
